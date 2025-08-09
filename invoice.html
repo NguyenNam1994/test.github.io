@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hóa Đơn</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+.invoice { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ddd; padding: 8px; }
+th { background-color: #f2f2f2; }
+.total { text-align: right; font-weight: bold; }
+.header, .footer { text-align: center; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div id="invoice" class="invoice">Đang tải hóa đơn...</div>
+
+<script>
+async function loadInvoice() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  // Thay link Google Script API của bạn vào đây
+  const apiURL = "https://script.google.com/macros/s/AKfycbw6zDevsWAKSU8HOEF16IFHjRUMlCxBlGbEF8YjjZvW3hGCp_kWXhwU52boWqwmjWOHOg/exec" + id;
+
+  try {
+    const res = await fetch(apiURL);
+    const data = await res.json();
+
+    if (!data.length) {
+      document.getElementById("invoice").innerHTML = "Không tìm thấy hóa đơn.";
+      return;
+    }
+
+    const order = data[0];
+    document.getElementById("invoice").innerHTML = `
+      <div class="header">
+        <h2>HÓA ĐƠN ĐẶT HÀNG</h2>
+        <p>Tên Công ty của bạn</p>
+        <p>Địa chỉ: Đường, Phường, Quận, Thành phố</p>
+        <p>Điện thoại: (012) 345-6789</p>
+      </div>
+      <hr>
+      <p><strong>Mã Đơn Hàng:</strong> ${order.MaDon}</p>
+      <p><strong>Ngày Đặt Hàng:</strong> ${order.ThoiGianSatHach || ""}</p>
+      <p><strong>Tên Khách Hàng:</strong> ${order.TenKhachHang}</p>
+      <p><strong>Địa Chỉ Giao Hàng:</strong> ${order.DiaChi}</p>
+      <table>
+        <tr>
+          <th>STT</th>
+          <th>Tên Sản Phẩm</th>
+          <th>Số Lượng</th>
+          <th>Đơn Giá</th>
+          <th>Thành Tiền</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>${order.LoaiGPLX}</td>
+          <td>1</td>
+          <td>${order.PhiThu}</td>
+          <td>${order.PhiThu}</td>
+        </tr>
+      </table>
+      <p class="total">Tổng cộng: ${order.PhiThu} VND</p>
+      <div class="footer">
+        <p>Cảm ơn quý khách đã đặt hàng!</p>
+      </div>
+    `;
+  } catch (err) {
+    document.getElementById("invoice").innerHTML = "Lỗi tải dữ liệu.";
+  }
+}
+
+loadInvoice();
+</script>
+</body>
+</html>
